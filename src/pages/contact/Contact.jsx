@@ -50,24 +50,24 @@ const Contact = () => {
                <div>
                   <div className="flex items-center gap-2 my-2 md:text-xl">
                      <AiOutlineMail />
-                     <a href="mailto: contact@geomancycoaching.org?subject=Feedback&body=message">
-                     contact@geomancycoaching.org
+                     <a href="mailto: yahayamanan26@gmail.com?subject=Feedback&body=message">
+                     yahayamanan26@gmail.com
                      </a>
       
                   </div>
                   
                   <div className="flex items-center gap-2  my-2 md:text-xl">
                      <CiPhone />
-                     <a href="tel:+233549373910">+233549373910</a>
+                     <a href="tel:+233501229200">+233501229200</a>
                   </div>
                   <div className="flex items-center gap-2 md:text-xl  my-2">
                      <AiOutlineFacebook />
                      <a
-                        href="https://m.facebook.com/profile.php?id=61564145274142&name=xhp_nt_"
+                        href="https://www.facebook.com/share/162N8uaNB7/?mibextid=wwXIfr"
                         rel="noreferrer"
                         target="_blank"
                      >
-                        Geomancy Coaching
+                        Last Stop Enterprise
                      </a>
                   </div>
                </div>
