@@ -2,7 +2,8 @@ import hero from "../../assets/hero3.png";
 import { Link } from "react-router-dom";
 import { TbArrowNarrowRight } from "react-icons/tb";
 import { useEffect, useState } from "react";
-const tags = ["Books", "Mechandise", "Courses", "Consultations", "Coaching"];
+const tags = ["Bags", "Appliances", "Office Essentials", "Travel Gear", "Lifestyle"];
+
 
 let currentIndex = 0;
 /**
@@ -74,7 +75,7 @@ const Hero = () => {
                         </p>
 
                         <p className="mt-3 text-gray-600 dark:text-gray-400">
-                        Unlock the secrets of ancient divination with our exclusive collection of books, courses, and unique merchandise. Whether you're a beginner or a seasoned practitioner, GeomancyCommerce has everything you need to explore the art of geomancy and deepen your knowledge.
+                        Elevate your everyday with Last Stop Enterprise — your one-stop shop for stylish bags and cutting-edge electronic appliances. From sleek laptop bags to innovative kitchen gadgets, we bring quality and convenience together. Experience the difference today!
                         </p>
 
                         <Link to="/all">
