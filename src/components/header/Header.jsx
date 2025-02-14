@@ -1,5 +1,12 @@
 import React from "react";
 
+/**
+ * A Header component that renders a section with a background color and a centered heading element.
+ * The heading element will display the text passed as a prop.
+ * The component is responsive and will adjust the font size and padding based on screen size.
+ * @param {string} text - The text to be displayed in the heading element.
+ * @returns {ReactElement} - The Header component.
+ */
 const Header = ({ text }) => {
 	return (
 		<section className="h-20 md:h-36 w-full bg-primary-content flex items-center">
