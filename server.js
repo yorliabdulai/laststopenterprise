@@ -20,7 +20,7 @@ app.use(cors({
 }));
 
 app.get("/", (req, res) => {
-    res.send("Welcome to Geomancy-Shop");
+    res.send("Welcome to Last Stop Enterprise");
 });
 
 const calculateOrderAmount = (items) => {
