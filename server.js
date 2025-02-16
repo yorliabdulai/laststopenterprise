@@ -14,7 +14,7 @@ if (process.env.NODE_ENV === "production") {
 
 app.use(express.json());
 app.use(cors({
-    origin: 'http://localhost:5175', // Allow only your frontend
+    origin: 'https://laststopenterprise.vercel.app', // Allow only your frontend
     methods: 'GET,POST,PUT,DELETE,OPTIONS',  // Specify the allowed methods
     allowedHeaders: 'Content-Type,Authorization' // Specify allowed headers
 }));
@@ -56,7 +56,7 @@ app.post("/initialize-transaction", async (req, res) => {
                 email: email,
                 amount: amount,
                 currency: "GHS", // Change to your desired currency if different
-                callback_url: "https://geomancy-commerce.vercel.app/checkout-success", // Replace with your actual callback URL
+                callback_url: "https://laststopenterprise.vercel.app/checkout-success", // Replace with your actual callback URL
                 metadata: {
                     shippingAddress,
                     description,
