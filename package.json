@@ -1,5 +1,6 @@
 {
-   "name": "geomancy-commerce",
+   "$schema": "https://json.schemastore.org/package.json",
+   "name": "last-stop-enterprise",
    "private": true,
    "version": "0.0.0",
    "scripts": {
