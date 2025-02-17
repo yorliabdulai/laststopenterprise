@@ -1,30 +1,30 @@
-import React, { useEffect, useState } from "react";
-//Firebase
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase/config";
+import { useEffect, useState } from "react";
+import  supabase  from "../supabase/supabase"; // Ensure correct import path
 
 const useFetchDocument = (collectionName, documentId) => {
     const [document, setDocument] = useState(null);
 
     const getDocument = async () => {
-        const docRef = doc(db, collectionName, documentId);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            const obj = {
-                id: documentId,
-                ...docSnap.data(),
-            };
-            setDocument(obj);
-             // Log the fetched document
-        } else {
+        try {
+            const { data, error } = await supabase
+                .from(collectionName)
+                .select("*")
+                .eq("id", documentId)
+                .single(); // Fetch only one record
+
+            if (error) throw error;
             
+            setDocument(data);
+        } catch (error) {
+            console.error("Error fetching document:", error.message);
         }
     };
 
-    // Fetching single document from firestore on initial component mount or when documentId changes
     useEffect(() => {
-        getDocument();
-    }, [documentId]); // Added documentId as a dependency
+        if (documentId) {
+            getDocument();
+        }
+    }, [documentId]); // Fetch when documentId changes
 
     return { document };
 };

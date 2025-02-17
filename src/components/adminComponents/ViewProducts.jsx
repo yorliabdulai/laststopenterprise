@@ -6,14 +6,14 @@ import { BiEdit, BiTrash } from "react-icons/bi";
 import { Link } from "react-router-dom";
 import { Search } from "../../components";
 import useFetchCollection from "../../hooks/useFetchCollection";
-import { doc, deleteDoc } from "firebase/firestore";
-import { ref, deleteObject } from "firebase/storage";
-import { db, storage } from "../../firebase/config";
+import supabase  from "../../supabase/supabase";
 import { useDispatch, useSelector } from "react-redux";
 import { storeProducts } from "../../redux/slice/productSlice";
 import { filterBySearch } from "../../redux/slice/filterSlice";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
+
+
 
 const ViewProducts = () => {
   const [search, setSearch] = useState("");
@@ -37,16 +37,16 @@ const ViewProducts = () => {
   const deleteSingleProduct = async (id, imageURL) => {
     try {
       // deleting a document from product collection
-      await deleteDoc(doc(db, "products", id));
-      // deleting image from database storage
-      const storageRef = ref(storage, imageURL);
-      await deleteObject(storageRef);
+      await supabase.from("products").delete().eq("id", id);
+      // deleting image from storage
+      const { error } = await supabase.storage.from("products").remove([imageURL]);
+      if (error) throw error;
       toast.info("Product deleted successfully");
     } catch (error) {
       toast.error(error.message);
-      
     }
   };
+
   return (
     <>
       {isLoading && <Loader />}

@@ -2,44 +2,44 @@ import React, { useState } from "react";
 import { toast } from "react-toastify";
 import Loader from "../loader/Loader";
 import { useNavigate } from "react-router-dom";
-// firebase
-import { doc, setDoc, Timestamp } from "firebase/firestore";
-import { db } from "../../firebase/config";
+import supabase from "../../supabase/supabase";
+
 
 const ChangeOrderStatus = ({ order, orderId }) => {
     const [status, setStatus] = useState("");
-    const [isLoading, setIsloading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
     const changeStatus = async (e) => {
         e.preventDefault();
-        setIsloading(true);
-
-        // Log order to check for fields
-        
+        setIsLoading(true);
 
         const orderDetails = {
-            ...(order.userId && { userId: order.userId }), // Include userId only if it exists
+            ...(order.userId && { userId: order.userId }),
             email: order.email,
             orderDate: order.orderDate,
-            ...(order.orderTime && { orderTime: order.orderTime }), // Include orderTime only if it exists
+            ...(order.orderTime && { orderTime: order.orderTime }),
             orderAmount: order.orderAmount,
             orderStatus: status,
-            ...(order.cartItems && { cartItems: order.cartItems }), // Include cartItems only if it exists
+            ...(order.cartItems && { cartItems: order.cartItems }),
             shippingAddress: order.shippingAddress,
             createdAt: order.createdAt,
-            editedAt: Timestamp.now().toDate(),
+            editedAt: new Date().toISOString(),
         };
 
         try {
-            await setDoc(doc(db, "orders", orderId), orderDetails);
+            const { error } = await supabase
+                .from("orders")
+                .update(orderDetails)
+                .eq("id", orderId);
+            
+            if (error) throw error;
             toast.success(`Order status changed to ${status}`);
             navigate("/admin/orders");
         } catch (error) {
             toast.error(error.message);
-            
         } finally {
-            setIsloading(false);
+            setIsLoading(false);
         }
     };
 

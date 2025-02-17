@@ -5,10 +5,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Loader from "../loader/Loader";
-import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { auth } from "../../firebase/config";
 import { useDispatch } from "react-redux";
 import { setActiveUser } from "../../redux/slice/authSlice"; // Assuming you have this action
+import  supabase from "../../supabase/supabase";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -19,56 +18,49 @@ const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-  
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        dispatch(setActiveUser({
-          email: user.email,
-          userName: user.displayName || "User",
-          userId: user.uid,
-        }));
-  
-        toast.success("Login Successful");
-        setIsLoading(false);
-        setIsLoggedIn(true);
-        setTimeout(() => {
-          document.getElementById("my-modal-4").checked = false;
-          navigate("/");
-        }, 2000);
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      toast.error(error.message);
+      setIsLoading(false);
+      return;
+    }
+
+    dispatch(
+      setActiveUser({
+        email: data.user.email,
+        userName: data.user.user_metadata.full_name || "User",
+        userId: data.user.id,
       })
-      .catch((error) => {
-        toast.error(error.message);
-        setIsLoading(false);
-      });
+    );
+
+    toast.success("Login Successful");
+    setIsLoading(false);
+    setIsLoggedIn(true);
+    setTimeout(() => {
+      document.getElementById("my-modal-4").checked = false;
+      navigate("/");
+    }, 2000);
   };
 
-  const provider = new GoogleAuthProvider();
-  const googleSignIn = () => {
+  const googleSignIn = async () => {
     setIsLoading(true);
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        const user = result.user;
-        dispatch(setActiveUser({
-          email: user.email,
-          userName: user.displayName || "User",
-          userId: user.uid,
-        }));
-        toast.success("Login Successful");
-        setIsLoading(false);
-        setIsLoggedIn(true);
-        setTimeout(() => {
-          document.getElementById("my-modal-4").checked = false;
-          navigate("/");
-        }, 2000);
-      })
-      .catch((error) => {
-        toast.error(error.message);
-        setIsLoading(false);
-      });
+    const { data, error } = await supabase.auth.signInWithOAuth({ provider: "google" });
+
+    if (error) {
+      toast.error(error.message);
+      setIsLoading(false);
+      return;
+    }
+
+    toast.success("Redirecting to Google for authentication...");
   };
 
   const AllFieldsRequired = Boolean(email) && Boolean(password);
@@ -93,7 +85,7 @@ const Login = () => {
             <p className="text-xl text-gray-600 text-center">Welcome back</p>
             <div className="btn w-full mt-4 gap-2" onClick={googleSignIn}>
               <FcGoogle size={22} />
-              Sign in with google
+              Sign in with Google
             </div>
             <div className="divider text-xs text-gray-400 uppercase">or login with email</div>
             <form className="form-control" onSubmit={handleSubmit}>

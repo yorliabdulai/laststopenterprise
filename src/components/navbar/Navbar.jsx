@@ -4,9 +4,8 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AdminOnlyLink } from "../adminRoute/AdminRoute";
-// firebase
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth } from "../../firebase/config";
+import supabase from "../../supabase/supabase";
+
 //Redux
 import { useDispatch, useSelector } from "react-redux";
 import { removeActiveUser, setActiveUser } from "../../redux/slice/authSlice";
@@ -22,35 +21,59 @@ const Navbar = () => {
 
   //* Monitor currently signed USER
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        if (displayName == null) {
-          setDisplayName(user.email.split("@")[0]);
-        }
+        setDisplayName(user.email ? user.email.split("@")[0] : "");
         dispatch(
           setActiveUser({
             email: user.email,
-            userName: user.displayName ? user.displayName : displayName,
-            userId: user.uid,
+            userName: user.user_metadata?.full_name || displayName,
+            userId: user.id,
           })
         );
       } else {
         setDisplayName("");
         dispatch(removeActiveUser());
       }
+    };
+  
+    getUser();
+  
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session?.user) {
+        setDisplayName(session.user.email ? session.user.email.split("@")[0] : "");
+        dispatch(
+          setActiveUser({
+            email: session.user.email,
+            userName: session.user.user_metadata?.full_name || session.user.email,
+            userId: session.user.id,
+          })
+        );
+      } else if (event === "SIGNED_OUT") {
+        setDisplayName("");
+        dispatch(removeActiveUser());
+      }
     });
-  }, []);
-
-  function logOutUser() {
-    signOut(auth)
-      .then(() => {
-        toast.success("User Signed Out ");
-        navigate("/");
-      })
-      .catch((error) => {
-        toast.error(error.code, error.message);
-      });
+  
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [dispatch]);
+  
+  async function logOutUser() {
+    const { error } = await supabase.auth.signOut();
+    if (!error) {
+      dispatch(removeActiveUser());  // Ensure Redux state resets
+      setDisplayName("");
+      toast.success("User Signed Out");
+      navigate("/");
+    } else {
+      toast.error(error.message);
+    }
   }
+  
+
   let activeStyle = {
     borderBottom: "2px solid white",
   };
@@ -187,12 +210,10 @@ const Navbar = () => {
           </Link>
         </div>
       </AdminOnlyLink>
-      {/* <div className="min-w-screen py-2 bg-accent flex items-center justify-center">
-        <p className="uppercase font-medium inline-block mx-2">Sale end in </p>
-        <Countdown />
-      </div> */}
     </>
   );
 };
 
 export default Navbar;
+
+

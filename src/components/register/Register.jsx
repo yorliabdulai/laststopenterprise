@@ -3,9 +3,8 @@ import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Loader from "../loader/Loader";
-import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../../firebase/config";
+import supabase  from "../../supabase/supabase";
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -16,27 +15,30 @@ const Register = () => {
   const [isRegistered, setIsRegistered] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       toast.error("Passwords do not match");
       return;
     }
     setIsLoading(true);
-    createUserWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        toast.success("Registration Successful");
-        setIsLoading(false);
-        setIsRegistered(true);
-        setTimeout(() => {
-          document.getElementById("my-modal-4").checked = false;
-          navigate("/");
-        }, 2000); // Delay navigation to allow the success message to be seen
-      })
-      .catch((error) => {
-        toast.error(error.message);
-        setIsLoading(false);
-      });
+    
+    const { user, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Registration Successful");
+      setIsRegistered(true);
+      setTimeout(() => {
+        document.getElementById("my-modal-4").checked = false;
+        navigate("/");
+      }, 2000);
+    }
+    setIsLoading(false);
   };
 
   const AllFieldsRequired = Boolean(email) && Boolean(password) && Boolean(confirmPassword);

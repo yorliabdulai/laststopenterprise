@@ -4,299 +4,184 @@ import Loader from "../loader/Loader";
 import { useNavigate, useParams } from "react-router-dom";
 import { categories } from "../../utils/adminProductCategories";
 import { defaultValues } from "../../utils/adminAddProductDefaultValues";
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage";
-import { collection, addDoc, Timestamp, setDoc, doc } from "firebase/firestore";
-import { storage, db } from "../../firebase/config";
 import { useSelector } from "react-redux";
+import supabase from "../../supabase/supabase";
 
-
-/**
- * Component for adding or editing a product
- * @description Handles the form fields for adding or editing a product
- * @param {string} paramsId - The ID of the product to edit
- * @returns {React.ReactElement} - The form elements for adding or editing a product
- */
 const AddProducts = () => {
   const navigate = useNavigate();
   const { id: paramsId } = useParams();
   const { products: reduxProducts } = useSelector((store) => store.product);
   const productEdit = reduxProducts.find((item) => item.id === paramsId);
-  const [product, setProduct] = useState(() => {
-    return detectForm(paramsId, defaultValues, productEdit);
-  });
-  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const [product, setProduct] = useState(() =>
+    paramsId === "ADD" ? defaultValues : productEdit || defaultValues
+  );
   const [isLoading, setIsLoading] = useState(false);
 
-  
-  /**
-   * Detects whether the product is being added or edited, and returns the appropriate values.
-   * @param {string} paramsId - The ID of the product to edit
-   * @param {Object} func1 - The default values for adding a product
-   * @param {Object} func2 - The product to edit
-   * @returns {Object} - The values to use for the form
-   */
-  function detectForm(paramsId, func1, func2) {
-    if (paramsId === "ADD") return func1;
-    return func2;
-  }
-
-  /**
-   * Handle Input Changes
-   * @param {React.ChangeEvent<HTMLInputElement>} e Change Event
-   * @description Updates the product state with the new value
-   * @example
-   * const inputEvent = {
-   *  target: {
-   *    name: "name",
-   *    value: "Product Name"
-   *  }
-   * }
-   * handleInputChange(inputEvent)
-   */
-  function handleInputChange(e) {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setProduct({ ...product, [name]: value });
-  }
-  
-  /**
-   * Handles image uploads to Firebase Storage
-   * @param {React.ChangeEvent<HTMLInputElement>} e Change Event
-   * @description Uploads the selected image file to Firebase Storage,
-   * sets the product state with the new image URL and shows upload progress
-   * @example
-   * const inputEvent = {
-   *  target: {
-   *    files: [File]
-   *  }
-   * }
-   * handleImageChange(inputEvent)
-   */
-  function handleImageChange(e) {
-    const file = e.target.files[0];
-    const storageRef = ref(storage, `images/${Date.now()}${file.name}`);
-    const uploadTask = uploadBytesResumable(storageRef, file);
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setUploadProgress(progress);
-      },
-      (error) => {
-        toast.error(error.code, error.message);
-      },
-      () => {
-        // Handle successful uploads on complete
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          setProduct({ ...product, imageURL: downloadURL });
-          toast.success("File Uploaded Successfully");
-        });
-      }
-    );
-  }
-  
-/**
- * Adds a new product to the Firestore database.
- * @param {React.FormEvent<HTMLFormElement>} e - The form submission event.
- * @description This function prevents the default form submission behavior,
- * shows a loading state, and adds a new product document to the "products"
- * collection in Firestore with the current product details. After successful
- * addition, it resets the product form and navigates to the "all-products" admin page.
- * Displays a success message on successful operation or an error message on failure.
- */
-  async function addProduct(e) {
-    e.preventDefault();
-    setIsLoading(true);
-    try {
-      const docRef = await addDoc(collection(db, "products"), {
-        name: product.name,
-        imageURL: product.imageURL,
-        price: Number(product.price),
-        category: product.category,
-        brand: product.brand,
-        description: product.description,
-        createdAt: Timestamp.now().toDate(),
-      });
-      setUploadProgress(0);
-      setProduct(defaultValues);
-      setIsLoading(false);
-      toast.success("Product added to Database Successfully");
-      navigate("/admin/all-products");
-    } catch (error) {
-      
-      toast.error("Something Went Wrong , Check Console");
-      setIsLoading(false);
-    }
-  }
-  
-/**
- * Edits an existing product in the Firestore database.
- * @param {React.FormEvent<HTMLFormElement>} e - The form submission event.
- * @description This function prevents the default form submission behavior,
- * shows a loading state, and updates the product document in the "products"
- * collection in Firestore with the current product details. If the product's
- * image has been updated, the old image is deleted from storage. After successful
- * update, it resets the product form and navigates to the "all-products" admin page.
- * Displays a success message on successful operation or an error message on failure.
- */
-  async function editProduct(e) {
-    e.preventDefault();
-    setIsLoading(true);
-    // Check if the image is updated
-    if (product.imageURL !== productEdit.imageURL) {
-      // deleting image from database storage
-      const storageRef = ref(storage, productEdit.imageURL);
-      await deleteObject(storageRef);
-    }
-    try {
-      await setDoc(doc(db, "products", paramsId), {
-        name: product.name,
-        imageURL: product.imageURL,
-        price: Number(product.price),
-        category: product.category,
-        brand: product.brand,
-        description: product.description,
-        // Preserving created at
-        createdAt: productEdit.createdAt,
-        editedAt: Timestamp.now().toDate(),
-      });
-      
-      setUploadProgress(0);
-      setProduct(defaultValues);
-      setIsLoading(false);
-      toast.success("Product Updated Successfully");
-      navigate("/admin/all-products");
-    } catch (error) {
-      
-      toast.error("Something Went Wrong , Check Console");
-      setIsLoading(false);
-    }
-  }
+    setProduct((prev) => ({ ...prev, [name]: value }));
+  };
 
-  //! Disable button until everything added to input fields
-  const AllFieldsRequired =
-    Boolean(product.brand) &&
-    Boolean(product.category) &&
-    Boolean(product.description) &&
-    Boolean(product.imageURL) &&
-    Boolean(product.name) &&
-    Boolean(product.name);
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const filePath = `products/${Date.now()}_${file.name}`;
+    setIsLoading(true);
+
+    const { data, error } = await supabase.storage
+      .from("product-images")
+      .upload(filePath, file);
+
+    if (error) {
+      toast.error(error.message);
+      setIsLoading(false);
+      return;
+    }
+
+    const { data: urlData, error: urlError } = supabase.storage
+      .from("product-images")
+      .getPublicUrl(filePath);
+    if (urlError) {
+      toast.error(urlError.message);
+      setIsLoading(false);
+      return;
+    }
+
+    setProduct((prev) => ({ ...prev, imageURL: urlData.publicUrl }));
+    toast.success("Image uploaded successfully");
+    setIsLoading(false);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    if (Object.values(product).some((field) => !field)) {
+      toast.error("All fields are required");
+      setIsLoading(false);
+      return;
+    }
+
+    const productData = {
+      ...product,
+      price: Number(product.price),
+      createdAt: new Date().toISOString(),
+    };
+
+    let error;
+    if (paramsId === "ADD") {
+      ({ error } = await supabase.from("products").insert([productData]));
+    } else {
+      ({ error } = await supabase.from("products").update(productData).eq("id", paramsId));
+    }
+
+    if (error) {
+      toast.error("Something went wrong");
+    } else {
+      toast.success(
+        paramsId === "ADD" ? "Product added successfully" : "Product updated successfully"
+      );
+      navigate("/admin/all-products");
+    }
+
+    setProduct(defaultValues);
+    setIsLoading(false);
+  };
 
   return (
     <>
       {isLoading && <Loader />}
-
       <main className="h-full border-r-2 p-1">
         <h1 className="text-xl md:text-3xl font-semibold pb-3">
-          {detectForm(paramsId, "Add New Product", "Edit Product")}
+          {paramsId === "ADD" ? "Add New Product" : "Edit Product"}
         </h1>
-        <form className="form-control" onSubmit={detectForm(paramsId, addProduct, editProduct)}>
+        <form className="form-control" onSubmit={handleSubmit}>
           <div className="py-2">
             <label className="label-text font-bold mb-2 block text-lg">Product Name:</label>
             <input
               className="input input-bordered max-w-lg w-full border-2"
               type="text"
-              placeholder="Product Name"
-              required
               name="name"
-              value={product.name}
+              value={product.name || ""}
               onChange={handleInputChange}
+              required
             />
           </div>
 
           <div className="py-2">
-            <label className="label-text font-bold mb-2 block text-lg">Product Price: </label>
+            <label className="label-text font-bold mb-2 block text-lg">Product Price:</label>
             <input
               className="input input-bordered max-w-lg w-full border-2"
               type="number"
-              placeholder="Product Price"
-              required
               name="price"
-              value={product.price}
+              value={product.price || ""}
               onChange={handleInputChange}
+              required
             />
           </div>
+
           <div className="py-2">
             <label className="label-text font-bold mb-2 block text-lg">Product Category:</label>
             <select
               className="select select-bordered w-full max-w-lg"
-              required
               name="category"
-              value={product.category}
+              value={product.category || ""}
               onChange={handleInputChange}
+              required
             >
-              <option disabled value="">
-                -- Choose a Product Category --
-              </option>
-              {categories.map((c) => {
-                return (
-                  <option key={c.id} value={c.name}>
-                    {c.name}
-                  </option>
-                );
-              })}
+              <option disabled value="">-- Choose a Product Category --</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.name}>{c.name}</option>
+              ))}
             </select>
           </div>
+
           <div className="py-2">
-            <label className="label-text font-bold mb-2 block text-lg">Product Brand: </label>
+            <label className="label-text font-bold mb-2 block text-lg">Product Brand:</label>
             <input
               className="input input-bordered max-w-lg w-full border-2"
               type="text"
-              placeholder="Product Brand"
-              required
               name="brand"
-              value={product.brand}
+              value={product.brand || ""}
               onChange={handleInputChange}
+              required
             />
           </div>
+
           <div className="py-2">
-            <label className="label-text font-bold mb-2 block text-lg">Product Description: </label>
+            <label className="label-text font-bold mb-2 block text-lg">Product Description:</label>
             <textarea
               className="textarea textarea-bordered h-32 max-w-lg w-full"
-              type="text"
-              placeholder="Product Description"
-              required
               name="description"
-              value={product.description}
+              value={product.description || ""}
               onChange={handleInputChange}
+              required
             ></textarea>
           </div>
+
           <div>
-            <label className="label-text font-bold mb-2 block text-lg">Product Image: </label>
-            <div className="border-2 rounded-sm  max-w-xl w-full px-4 pb-2">
-              <div>
-                <progress
-                  className="progress progress-primary w-44 md:w-72 xl:w-full"
-                  value={uploadProgress}
-                  max="100"
-                ></progress>
-              </div>
+            <label className="label-text font-bold mb-2 block text-lg">Product Image:</label>
+            <input
+              className="max-w-lg w-full"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              required={!product.imageURL}
+            />
+            {product.imageURL && (
               <input
-                className="max-w-lg w-full"
-                accept="image/all"
-                type="file"
-                placeholder="IMAGE URL"
-                name="image"
-                onChange={handleImageChange}
+                className="input input-sm input-bordered max-w-lg w-full my-2"
+                type="text"
+                value={product.imageURL}
+                disabled
               />
-              {product.imageURL === "" ? null : (
-                <input
-                  className="input input-sm input-bordered max-w-lg w-full my-2"
-                  type="text"
-                  value={product.imageURL}
-                  required
-                  placeholder="Image URL"
-                  disabled
-                />
-              )}
-            </div>
+            )}
           </div>
 
-          <button
-            type="submit"
-            className="btn btn-primary text-lg max-w-[200px]  mt-2"
-            disabled={!AllFieldsRequired}
-          >
-            {detectForm(paramsId, "Add Product", "Update Product")}
+          <button type="submit" className="btn btn-primary text-lg max-w-[200px] mt-2">
+            {paramsId === "ADD" ? "Add Product" : "Update Product"}
           </button>
         </form>
       </main>
