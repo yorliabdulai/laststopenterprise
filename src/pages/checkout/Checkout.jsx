@@ -91,7 +91,7 @@ const Checkout = () => {
             sessionStorage.setItem("pendingOrderId", savedOrderId);
     
             // Proceed with the Paystack payment initiation
-            const response = await fetch("http://localhost:3000/initialize-transaction", {
+            const response = await fetch("https://laststopenterprise.onrender.com/initialize-transaction", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(orderDetails),
@@ -121,7 +121,7 @@ const Checkout = () => {
         console.log("Verifying transaction with reference:", reference);
 
         try {
-            const response = await fetch(`http://localhost:3000/verify-transaction?reference=${reference}`);
+            const response = await fetch(`https://laststopenterprise.onrender.com/verify-transaction?reference=${reference}`);
 
             if (!response.ok) {
                 throw new Error(`Transaction verification failed with status ${response.status}`);
