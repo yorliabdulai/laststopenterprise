@@ -3,6 +3,7 @@ import { formatPrice } from "../../utils/formatPrice";
 import { useNavigate } from "react-router-dom";
 
 const OrdersComponent = ({ orders, user, admin }) => {
+	
 	const navigate = useNavigate();
 
 	function handleUserClick(orderId) {
@@ -30,7 +31,7 @@ const OrdersComponent = ({ orders, user, admin }) => {
 					</p>
 
 					{orders.map((order, index) => {
-						const { id, orderDate, orderAmount, orderStatus, email } = order;
+						const { id, orderDate, amount, orderStatus, email } = order;
 						return (
 							<section
 								className="w-full my-6 shadow-md rounded-md cursor-pointer hover:bg-base-200 duration-200"
@@ -57,7 +58,7 @@ const OrdersComponent = ({ orders, user, admin }) => {
 										<p className="text-gray-500 text-sm md:text-lg">
 											TOTAL :
 											<span className="text-primary">
-												{formatPrice(orderAmount)}
+												{formatPrice(amount)}
 											</span>
 										</p>
 									</div>

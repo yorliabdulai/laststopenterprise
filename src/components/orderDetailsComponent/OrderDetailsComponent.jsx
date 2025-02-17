@@ -7,6 +7,9 @@ import { OrderTable, Steps } from "../../components";
 const OrderDetailsComponent = ({ order, admin, user, orderId }) => {
     
      // Log the order structure
+     console.log("Order object:", order);
+
+     console.log(order?.amount); // Check the value before formatting
 
     return (
         <>
@@ -24,7 +27,7 @@ const OrderDetailsComponent = ({ order, admin, user, orderId }) => {
                             <p className="font-semibold text-lg my-2">
                                 Order Amount :
                                 <span className="font-light text-gray-500">
-                                    {formatPrice(order?.orderAmount)}
+                                    {formatPrice(order?.amount)}
                                 </span>
                             </p>
                             <p className="font-semibold text-lg my-2">
