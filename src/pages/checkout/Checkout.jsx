@@ -61,9 +61,12 @@ const Checkout = () => {
 
     const handlePaystackPayment = async () => {
         setIsLoading(true);
-        console.log("Initializing Paystack transaction...");
-
         try {
+            console.log("Starting payment process...");
+            console.log("Cart Items:", cartItems);
+            console.log("Total Amount:", totalAmount);
+            console.log("User Email:", email);
+    
             const response = await fetch("http://localhost:3000/initialize-transaction", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -78,43 +81,25 @@ const Checkout = () => {
                     description: `Payment of ${formatPrice(totalAmount)} from ${email}`,
                 }),
             });
-
-            if (!response.ok) {
-                throw new Error(`Server error: ${response.status} ${response.statusText}`);
-            }
-
+    
+            console.log("Response Status:", response.status);
+    
             const data = await response.json();
-            console.log("Transaction initialization response:", data);
-
+            console.log("Response Data:", data);
+    
             if (data.authorization_url) {
-                const orderDetails = {
-                    email,
-                    userId: userId || "guest",
-                    orderDate: new Date().toISOString(),
-                    orderAmount: totalAmount,
-                    orderStatus: "Pending Payment",
-                    cartItems,
-                    shippingAddress,
-                };
-
-                const orderId = await saveOrder(orderDetails);
-
-                if (orderId) {
-                    sessionStorage.setItem("pendingOrderId", orderId);
-                    window.location.href = data.authorization_url;
-                } else {
-                    throw new Error("Failed to save order before redirection");
-                }
+                window.location.href = data.authorization_url;
             } else {
                 toast.error("Failed to initiate payment. Please try again.");
             }
         } catch (error) {
             console.error("Error during payment initiation:", error);
-            toast.error(`Payment error: ${error.message}`);
+            toast.error("Failed to process payment. Please try again.");
         } finally {
             setIsLoading(false);
         }
     };
+    
 
     const verifyTransaction = async (reference) => {
         console.log("Verifying transaction with reference:", reference);
