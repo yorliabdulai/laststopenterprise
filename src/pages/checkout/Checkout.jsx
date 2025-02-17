@@ -3,7 +3,7 @@ import Loader from "../../components/loader/Loader";
 import { useSelector, useDispatch } from "react-redux";
 import { calculateSubtotal, calculateTotalQuantity, clearCart } from "../../redux/slice/cartSlice";
 import { formatPrice } from "../../utils/formatPrice";
-import  supabase  from "../../supabase/supabase"; // Ensure correct import
+import supabase from "../../supabase/supabase"; // Ensure correct import
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "./paystack.css";
@@ -27,11 +27,14 @@ const Checkout = () => {
         const reference = urlParams.get("reference");
 
         if (reference) {
+            console.log("Reference found in URL:", reference);
             verifyTransaction(reference);
         }
     }, []);
 
     const saveOrder = async (orderDetails) => {
+        console.log("Attempting to save order:", orderDetails);
+
         if (!orderDetails.email) {
             toast.error("User email not found. Cannot save order.");
             return null;
@@ -46,17 +49,20 @@ const Checkout = () => {
 
             if (error) throw error;
 
+            console.log("Order saved successfully! Order ID:", data.id);
             toast.success("Order saved successfully!");
             return data.id;
         } catch (error) {
-            console.error("Error saving order:", error.message);
-            toast.error("Failed to save order. Please try again.");
+            console.error("Error saving order:", error);
+            toast.error(`Failed to save order: ${error.message}`);
             return null;
         }
     };
 
     const handlePaystackPayment = async () => {
         setIsLoading(true);
+        console.log("Initializing Paystack transaction...");
+
         try {
             const response = await fetch("http://localhost:3000/initialize-transaction", {
                 method: "POST",
@@ -73,7 +79,12 @@ const Checkout = () => {
                 }),
             });
 
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status} ${response.statusText}`);
+            }
+
             const data = await response.json();
+            console.log("Transaction initialization response:", data);
 
             if (data.authorization_url) {
                 const orderDetails = {
@@ -92,46 +103,57 @@ const Checkout = () => {
                     sessionStorage.setItem("pendingOrderId", orderId);
                     window.location.href = data.authorization_url;
                 } else {
-                    throw new Error("Failed to save order");
+                    throw new Error("Failed to save order before redirection");
                 }
             } else {
                 toast.error("Failed to initiate payment. Please try again.");
             }
         } catch (error) {
-            console.error("Payment process failed:", error);
-            toast.error("Failed to process payment. Please try again.");
+            console.error("Error during payment initiation:", error);
+            toast.error(`Payment error: ${error.message}`);
         } finally {
             setIsLoading(false);
         }
     };
 
     const verifyTransaction = async (reference) => {
+        console.log("Verifying transaction with reference:", reference);
+
         try {
             const response = await fetch(`http://localhost:3000/verify-transaction?reference=${reference}`);
+
+            if (!response.ok) {
+                throw new Error(`Transaction verification failed with status ${response.status}`);
+            }
+
             const data = await response.json();
+            console.log("Transaction verification response:", data);
 
             if (data.success) {
                 const pendingOrderId = sessionStorage.getItem("pendingOrderId");
 
                 if (pendingOrderId) {
+                    console.log("Updating order status to Completed for Order ID:", pendingOrderId);
                     await updateOrderStatus(pendingOrderId, "Completed");
                     dispatch(clearCart());
                     sessionStorage.removeItem("pendingOrderId");
                     toast.success("Payment successful and order completed!");
                     navigate("/checkout-success");
                 } else {
-                    throw new Error("Pending order ID not found");
+                    throw new Error("Pending order ID not found in session storage");
                 }
             } else {
                 toast.error("Transaction verification failed.");
             }
         } catch (error) {
             console.error("Error verifying transaction:", error);
-            toast.error("Error verifying payment.");
+            toast.error(`Error verifying payment: ${error.message}`);
         }
     };
 
     const updateOrderStatus = async (orderId, newStatus) => {
+        console.log(`Updating order status for Order ID: ${orderId} to ${newStatus}`);
+
         try {
             const { error } = await supabase
                 .from("orders")
@@ -139,9 +161,11 @@ const Checkout = () => {
                 .eq("id", orderId);
 
             if (error) throw error;
+
+            console.log("Order status updated successfully");
         } catch (error) {
-            console.error("Error updating order status:", error.message);
-            toast.error("Failed to update order status. Please contact support.");
+            console.error("Error updating order status:", error);
+            toast.error(`Failed to update order status: ${error.message}`);
         }
     };
 
