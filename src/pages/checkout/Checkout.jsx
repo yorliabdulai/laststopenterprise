@@ -67,19 +67,34 @@ const Checkout = () => {
             console.log("Total Amount:", totalAmount);
             console.log("User Email:", email);
     
+            // Prepare order details
+            const orderDetails = {
+                items: cartItems.map((item) => ({
+                    price: item.price,
+                    qty: item.qty,
+                })),
+                email,
+                shippingAddress,
+                amount: totalAmount * 100,  // Convert to the smallest unit (e.g., kobo)
+                description: `Payment of ${formatPrice(totalAmount)} from ${email}`,
+                orderStatus: "Pending",  // Set initial status to "Pending"
+            };
+    
+            // Save the order before initiating the payment
+            const savedOrderId = await saveOrder(orderDetails);
+            if (!savedOrderId) {
+                toast.error("Failed to save order. Please try again.");
+                return;  // Don't proceed if order is not saved
+            }
+    
+            // Store the order ID in sessionStorage to retrieve later for status update
+            sessionStorage.setItem("pendingOrderId", savedOrderId);
+    
+            // Proceed with the Paystack payment initiation
             const response = await fetch("http://localhost:3000/initialize-transaction", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    items: cartItems.map((item) => ({
-                        price: item.price,
-                        qty: item.qty,
-                    })),
-                    email,
-                    shippingAddress,
-                    amount: totalAmount * 100,
-                    description: `Payment of ${formatPrice(totalAmount)} from ${email}`,
-                }),
+                body: JSON.stringify(orderDetails),
             });
     
             console.log("Response Status:", response.status);
@@ -88,7 +103,7 @@ const Checkout = () => {
             console.log("Response Data:", data);
     
             if (data.authorization_url) {
-                window.location.href = data.authorization_url;
+                window.location.href = data.authorization_url; // Redirect to Paystack for payment
             } else {
                 toast.error("Failed to initiate payment. Please try again.");
             }
@@ -99,6 +114,7 @@ const Checkout = () => {
             setIsLoading(false);
         }
     };
+    
     
 
     const verifyTransaction = async (reference) => {
