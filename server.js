@@ -14,7 +14,7 @@ if (process.env.NODE_ENV === "production") {
 
 app.use(express.json());
 app.use(cors({
-    origin: 'https://laststopenterprise.vercel.app', // Allow only your frontend
+    origin: 'https://laststopenterprise.vercel.app', // Alaw only your frontend
     methods: 'GET,POST,PUT,DELETE,OPTIONS',  // Specify the allowed methods
     allowedHeaders: 'Content-Type,Authorization' // Specify allowed headers
 }));
@@ -35,7 +35,7 @@ const calculateOrderAmount = (items) => {
     }, 0);
 
     // Convert to the smallest currency unit (Ghanaian Ghanas)
-    const totalAmountInGhanaCedis = totalCartAmountGHS ; // Convert to GHS
+    const totalAmountInGhanaCedis = totalCartAmountGHS * 10 ; // Convert to GHS
 
     return totalAmountInGhanaCedis; // Return total in GHS
 };
