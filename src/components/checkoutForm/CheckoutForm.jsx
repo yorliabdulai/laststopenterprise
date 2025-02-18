@@ -62,7 +62,7 @@ const CheckoutForm = () => {
                     email,
                     shippingAddress,
                     amount: totalAmount/100,
-                    description: `Payment of ${formatPrice(totalAmount)} from ${email}`,
+                    description: `Payment of ${formatPrice(totalAmount/100)} from ${email}`,
                 }),
             });
 
@@ -73,7 +73,7 @@ const CheckoutForm = () => {
                     email,
                     userId: userId || "guest",
                     orderDate: new Date().toISOString(),
-                    orderAmount: totalAmount,
+                    orderAmount: totalAmount/100,
                     orderStatus: "Pending Payment",
                     cartItems,
                     shippingAddress,
