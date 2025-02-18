@@ -10,7 +10,10 @@ const orderSlice = createSlice({
 	initialState,
 	reducers: {
 		storeOrders: (state, action) => {
-			state.orderHistory = action.payload;
+			state.orderHistory = action.payload.map(order => ({
+				...order,
+				amount: order.amount / 100, 
+			}));
 		},
 		totalOrderAmount: (state, action) => {
 			const newArray = [];
