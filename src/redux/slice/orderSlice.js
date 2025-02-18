@@ -12,7 +12,7 @@ const orderSlice = createSlice({
 		storeOrders: (state, action) => {
 			state.orderHistory = action.payload.map(order => ({
 				...order,
-				amount: order.amount / 100, 
+				amount: order.amount , 
 			}));
 		},
 		totalOrderAmount: (state, action) => {
