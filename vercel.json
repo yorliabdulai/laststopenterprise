@@ -1,0 +1,9 @@
+{
+    "routes": [
+      {
+        "src": "/checkout-success",
+        "dest": "/index.html"
+      }
+    ]
+  }
+  
