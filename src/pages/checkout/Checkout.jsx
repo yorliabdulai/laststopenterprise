@@ -75,7 +75,7 @@ const Checkout = () => {
                 })),
                 email,
                 shippingAddress,
-                amount: totalAmount / 100,  // Convert to the smallest unit (e.g., kobo)
+                amount: totalAmount,  // Convert to the smallest unit (e.g., kobo)
                 description: `Payment of ${formatPrice(totalAmount/100)} from ${email}`,
                 orderStatus: "Pending",  // Set initial status to "Pending"
             };
