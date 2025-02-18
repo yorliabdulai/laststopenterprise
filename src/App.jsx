@@ -60,7 +60,7 @@ const App = () => {
         />
 
         {/* 404 routes */}
-        <Route path="/*" element={<NotFound />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <Modal />
     </>
