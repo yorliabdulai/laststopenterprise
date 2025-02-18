@@ -4,7 +4,7 @@ import { formatPrice } from "../../utils/formatPrice";
 import ChangeOrderStatus from "../changeOrderStatus/ChangeOrderStatus";
 import { OrderTable, Steps } from "../../components";
 
-const OrderDetailsComponent = ({ order, admin, user, orderId }) => {
+const OrderDetailsComponent = ({ order, admin, user, id }) => {
     
      // Log the order structure
      console.log("Order object:", order);
@@ -68,7 +68,7 @@ const OrderDetailsComponent = ({ order, admin, user, orderId }) => {
                         )}
                     </div>
                     {/* Update order Status */}
-                    {admin && <ChangeOrderStatus order={order} orderId={orderId} />}
+                    {admin && <ChangeOrderStatus order={order} id={id} />}
                 </article>
             </section>
             <main className="py-5">
