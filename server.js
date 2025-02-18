@@ -14,7 +14,7 @@ if (process.env.NODE_ENV === "production") {
 
 app.use(express.json());
 app.use(cors({
-    origin: 'https://laststopenterprise.vercel.app', // Alaw only your frontend
+    origin: 'https://laststopenterprise.vercel.app', 
     methods: 'GET,POST,PUT,DELETE,OPTIONS',  // Specify the allowed methods
     allowedHeaders: 'Content-Type,Authorization' // Specify allowed headers
 }));
