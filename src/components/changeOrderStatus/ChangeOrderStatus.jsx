@@ -4,16 +4,24 @@ import Loader from "../loader/Loader";
 import { useNavigate } from "react-router-dom";
 import supabase from "../../supabase/supabase";
 
-
-const ChangeOrderStatus = ({ order}) => {
-    const orderId = order?.id;
+const ChangeOrderStatus = ({ order }) => {
+    const orderId = order?.id; // Ensure it gets the ID
     const [status, setStatus] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
+    console.log("Order Object:", order);
+    console.log("Extracted Order ID:", orderId);
+
     const changeStatus = async (e) => {
         e.preventDefault();
         setIsLoading(true);
+
+        if (!orderId) {
+            toast.error("Error: Order ID is missing!");
+            setIsLoading(false);
+            return;
+        }
 
         const orderDetails = {
             ...(order.userId && { userId: order.userId }),
@@ -32,13 +40,15 @@ const ChangeOrderStatus = ({ order}) => {
             const { error } = await supabase
                 .from("orders")
                 .update(orderDetails)
-                .eq("id", orderId);
-            
+                .eq("id", orderId); // Change "id" if your Supabase uses a different field name
+
             if (error) throw error;
+
             toast.success(`Order status changed to ${status}`);
             navigate("/admin/orders");
         } catch (error) {
-            toast.error(error.message);
+            console.error("Supabase Error:", error);
+            toast.error(`Update failed: ${error.message}`);
         } finally {
             setIsLoading(false);
         }
