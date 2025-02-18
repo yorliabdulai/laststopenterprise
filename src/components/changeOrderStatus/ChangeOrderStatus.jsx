@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 import supabase from "../../supabase/supabase";
 
 
-const ChangeOrderStatus = ({ order, orderId }) => {
+const ChangeOrderStatus = ({ order}) => {
+    const orderId = order?.id;
     const [status, setStatus] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
