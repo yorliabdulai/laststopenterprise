@@ -61,7 +61,7 @@ const CheckoutForm = () => {
                     items: cartItems.map(item => ({ price: item.price, qty: item.qty })),
                     email,
                     shippingAddress,
-                    amount: totalAmount,
+                    amount: totalAmount/100,
                     description: `Payment of ${formatPrice(totalAmount)} from ${email}`,
                 }),
             });
