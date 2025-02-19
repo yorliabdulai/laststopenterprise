@@ -69,7 +69,9 @@ const Checkout = () => {
     
             // Prepare order details
             const orderDetails = {
-                items: cartItems.map((item) => ({
+                items: orderDetails.items.map((item) => ({
+                    name: item.name, 
+                    image: item.imageUrl, 
                     price: item.price,
                     qty: item.qty,
                 })),
