@@ -8,6 +8,8 @@ const OrderDetailsComponent = ({ order, admin, user, id }) => {
     
      // Log the order structure
      console.log("Order object:", order);
+    console.log("Cart Items:", order?.cartItems);
+
 
      console.log(order?.amount); // Check the value before formatting
 

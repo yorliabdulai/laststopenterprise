@@ -5,6 +5,9 @@ import "react-lazy-load-image-component/src/effects/blur.css";
 import { formatPrice } from "../../utils/formatPrice";
 
 const OrderTable = ({ user, order }) => {
+  console.log("OrderTable received order:", order);
+ console.log("Cart Items:", order?.cartItems);
+
   return (
     <div className="overflow-x-auto">
       <table className="table table-compact w-full">
