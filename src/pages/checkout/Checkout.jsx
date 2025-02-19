@@ -74,12 +74,14 @@ const Checkout = () => {
     
             // Prepare order details
             const orderDetails = {
-                items: cartItems.map((item) => ({
-                    name: item.name, 
-                    image: item.imageURL,  // Ensure this key matches the correct data field
-                    price: item.price,
-                    qty: item.qty,
-                })),
+                items: cartItems.map(({ id, name, imageURL, price, qty, category }) => ({
+                    id,
+                    name,
+                    imageURL, // Keep the correct field name for consistency
+                    price,
+                    qty,
+                    category
+                })),                
                 email,
                 shippingAddress,
                 userId: userId || "guest",
