@@ -107,7 +107,12 @@ const Checkout = () => {
             });
     
             console.log("Response Status:", response.status);
-    
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error("Fetch request failed:", response.status, errorText);
+                throw new Error(`Fetch failed: ${response.status} ${errorText}`);
+            }
+            
             const data = await response.json();
             console.log("Response Data:", data);
     
