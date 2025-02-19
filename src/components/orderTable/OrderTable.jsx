@@ -1,16 +1,10 @@
 import { Link } from "react-router-dom";
+// lazy load
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
 import { formatPrice } from "../../utils/formatPrice";
-import { useSelector } from "react-redux";
 
 const OrderTable = ({ user, order }) => {
-<<<<<<< HEAD
-  console.log("OrderTable received order:", order);
-  console.log("Order Items:", order?.items); // Debugging
-
-=======
->>>>>>> parent of 5815563 (fix: enhance logging in OrderDetailsComponent and OrderTable, and set default userId in Checkout)
   return (
     <div className="overflow-x-auto">
       <table className="table table-compact w-full">
@@ -21,36 +15,31 @@ const OrderTable = ({ user, order }) => {
           </tr>
         </thead>
         <tbody>
-          {/* Use order.items instead of order.cartItems */}
-          {orderedProducts.map((product, index) => {
-            // Destructure values safely
-            const { id: productId, name, price, imageURL, qty } = product || {};
-
+          {(order.cartItems || []).map((product, index) => {
+            const { id: productId, name, price, imageURL, qty } = product || {}; // Added fallback
             return (
               <tr key={index}>
                 <td>
-                  <Link to={`/product-details`}>
+                  <Link to={`/product-details/${productId}`}>
                     <LazyLoadImage
                       src={
-                        product.imageURL ||
+                        imageURL ||
                         `https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png`
                       }
-                      alt={product.name || "Product"}
+                      alt={name || "Product"}
                       className="w-10 sm:w-24 object-fill"
                       placeholderSrc="https://www.slntechnologies.com/wp-content/uploads/2017/08/ef3-placeholder-image.jpg"
                       effect="blur"
                     />
                     <div className="md:text-lg">{name || "Unnamed Product"}</div>
                     <div className="md:text-lg font-medium">
-                      Qty:{" "}
-                      <span className="md:text-lg font-medium text-primary">
-                        {product.qty || 0}
-                      </span>
+                      Qty:
+                      <span className="md:text-lg font-medium text-primary">{qty || 0}</span>
                     </div>
                     <div className="md:text-lg font-medium">
-                      Total:{" "}
+                      Total:
                       <span className="md:text-lg font-medium text-primary">
-                        {formatPrice((product.price || 0) * (qty || 0))}
+                        {formatPrice((price || 0) * (qty || 0))}
                       </span>
                     </div>
                   </Link>
