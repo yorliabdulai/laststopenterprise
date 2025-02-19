@@ -34,30 +34,35 @@ const Checkout = () => {
 
     const saveOrder = async (orderDetails) => {
         console.log("Attempting to save order:", orderDetails);
-
+    
         if (!orderDetails.email) {
             toast.error("User email not found. Cannot save order.");
             return null;
         }
-
+    
         try {
             const { data, error } = await supabase
                 .from("orders")
                 .insert([{ ...orderDetails, createdAt: new Date().toISOString() }])
                 .select("id")
                 .single();
-
-            if (error) throw error;
-
+    
+            if (error) {
+                console.error("Supabase insertion error:", error);
+                toast.error(`Supabase error: ${error.message}`);
+                return null;
+            }
+    
             console.log("Order saved successfully! Order ID:", data.id);
             toast.success("Order saved successfully!");
             return data.id;
         } catch (error) {
-            console.error("Error saving order:", error);
-            toast.error(`Failed to save order: ${error.message}`);
+            console.error("Unexpected error saving order:", error);
+            toast.error(`Unexpected error saving order: ${error.message}`);
             return null;
         }
     };
+    
 
     const handlePaystackPayment = async () => {
         setIsLoading(true);
