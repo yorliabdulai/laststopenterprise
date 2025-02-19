@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Loader from "../../components/loader/Loader";
 import { useSelector, useDispatch } from "react-redux";
 import { calculateSubtotal, calculateTotalQuantity, clearCart } from "../../redux/slice/cartSlice";
+import { storeOrders } from "../../redux/slice/orderSlice";
 import { formatPrice } from "../../utils/formatPrice";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -31,6 +32,46 @@ const CheckoutForm = () => {
         }
     }, []);
 
+    const fetchProductDetails = async (cartItems) => {
+        try {
+            // Use id from cart items since that's what your cart is using
+            const productIds = [...new Set(cartItems.map(item => item.id))];
+            
+            const { data: products, error } = await supabase
+                .from('products')
+                .select('id, name, imageURL')
+                .in('id', productIds);
+
+            if (error) throw error;
+
+            return products.reduce((acc, product) => {
+                acc[product.id] = product;
+                return acc;
+            }, {});
+        } catch (error) {
+            console.error("Error fetching product details:", error);
+            throw error;
+        }
+    };
+
+    const constructOrderItems = async (cartItems) => {
+        try {
+            const productDetails = await fetchProductDetails(cartItems);
+            
+            return cartItems.map(item => ({
+                productId: item.id, // Use id as productId for order items
+                name: productDetails[item.id]?.name || 'Product Name Not Found',
+                imageUrl: productDetails[item.id]?.imageURL || '',
+                price: item.price,
+                qty: item.qty,
+                subtotal: item.qty * item.price
+            }));
+        } catch (error) {
+            console.error("Error constructing order items:", error);
+            throw error;
+        }
+    };
+
     const saveOrder = async (orderDetails) => {
         if (!orderDetails.email) {
             console.error("User email not found. Cannot save order.");
@@ -39,9 +80,36 @@ const CheckoutForm = () => {
         }
 
         try {
-            const { data, error } = await supabase.from("orders").insert([{ ...orderDetails }]).select();
+            const items = await constructOrderItems(orderDetails.cartItems);
+            
+            const completeOrder = {
+                email: orderDetails.email,
+                userId: orderDetails.userId,
+                orderDate: orderDetails.orderDate,
+                amount: orderDetails.orderAmount,
+                orderStatus: orderDetails.orderStatus,
+                shippingAddress: orderDetails.shippingAddress,
+                items,
+                reference: orderDetails.reference
+            };
+
+            const { data, error } = await supabase
+                .from("orders")
+                .insert([completeOrder])
+                .select();
             
             if (error) throw error;
+
+            // Update Redux store with new order
+            const { data: allOrders, error: fetchError } = await supabase
+                .from("orders")
+                .select('*')
+                .eq('userId', orderDetails.userId);
+
+            if (!fetchError && allOrders) {
+                dispatch(storeOrders(allOrders));
+            }
+
             toast.success("Order saved successfully!");
             return data[0]?.id;
         } catch (error) {
@@ -77,6 +145,7 @@ const CheckoutForm = () => {
                     orderStatus: "Pending Payment",
                     cartItems,
                     shippingAddress,
+                    reference: data.reference
                 };
 
                 const orderId = await saveOrder(orderDetails);
@@ -108,6 +177,17 @@ const CheckoutForm = () => {
                 
                 if (pendingOrderId) {
                     await updateOrderStatus(pendingOrderId, "Completed");
+                    
+                    // Fetch updated orders and update Redux store
+                    const { data: orders } = await supabase
+                        .from("orders")
+                        .select('*')
+                        .eq('userId', userId);
+                    
+                    if (orders) {
+                        dispatch(storeOrders(orders));
+                    }
+
                     dispatch(clearCart());
                     sessionStorage.removeItem('pendingOrderId');
                     toast.success("Payment successful and order completed!");
@@ -126,10 +206,13 @@ const CheckoutForm = () => {
 
     const updateOrderStatus = async (orderId, newStatus) => {
         try {
-            const { error } = await supabase.from("orders").update({
-                orderStatus: newStatus,
-                updatedAt: new Date().toISOString()
-            }).eq("id", orderId);
+            const { error } = await supabase
+                .from("orders")
+                .update({
+                    orderStatus: newStatus,
+                    updatedAt: new Date().toISOString()
+                })
+                .eq("id", orderId);
             
             if (error) throw error;
         } catch (error) {

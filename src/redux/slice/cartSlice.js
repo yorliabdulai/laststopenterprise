@@ -22,8 +22,6 @@ const cartSlice = createSlice({
             // New item - ensure name and imageURL are included
             const tempProduct = {
                id: action.payload.id,
-               name: action.payload.name, // Ensure name is stored
-               imageURL: action.payload.imageURL, // Ensure imageURL is stored
                price: action.payload.price,
                qty: 1,
             };
