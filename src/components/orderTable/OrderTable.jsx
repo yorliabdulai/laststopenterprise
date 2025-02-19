@@ -1,12 +1,11 @@
 import { Link } from "react-router-dom";
-// lazy load
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
 import { formatPrice } from "../../utils/formatPrice";
 
 const OrderTable = ({ user, order }) => {
   console.log("OrderTable received order:", order);
- console.log("Cart Items:", order?.cartItems);
+  console.log("Order Items:", order?.items); // Debugging
 
   return (
     <div className="overflow-x-auto">
@@ -18,15 +17,18 @@ const OrderTable = ({ user, order }) => {
           </tr>
         </thead>
         <tbody>
-          {(order.cartItems || []).map((product, index) => {
-            const { id: productId, name, price, imageURL, qty } = product || {}; // Added fallback
+          {/* Use order.items instead of order.cartItems */}
+          {(order.items || []).map((product, index) => {
+            // Destructure values safely
+            const { id: productId, name, price, imageUrl, qty } = product || {};
+
             return (
               <tr key={index}>
                 <td>
                   <Link to={`/product-details/${productId}`}>
                     <LazyLoadImage
                       src={
-                        imageURL ||
+                        imageUrl ||
                         `https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png`
                       }
                       alt={name || "Product"}
@@ -36,11 +38,13 @@ const OrderTable = ({ user, order }) => {
                     />
                     <div className="md:text-lg">{name || "Unnamed Product"}</div>
                     <div className="md:text-lg font-medium">
-                      Qty:
-                      <span className="md:text-lg font-medium text-primary">{qty || 0}</span>
+                      Qty:{" "}
+                      <span className="md:text-lg font-medium text-primary">
+                        {qty || 0}
+                      </span>
                     </div>
                     <div className="md:text-lg font-medium">
-                      Total:
+                      Total:{" "}
                       <span className="md:text-lg font-medium text-primary">
                         {formatPrice((price || 0) * (qty || 0))}
                       </span>
