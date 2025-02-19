@@ -4,6 +4,12 @@ import "react-lazy-load-image-component/src/effects/blur.css";
 import { formatPrice } from "../../utils/formatPrice";
 
 const OrderTable = ({ user, order }) => {
+<<<<<<< HEAD
+  console.log("OrderTable received order:", order);
+  console.log("Order Items:", order?.items); // Debugging
+
+=======
+>>>>>>> parent of 5815563 (fix: enhance logging in OrderDetailsComponent and OrderTable, and set default userId in Checkout)
   return (
     <div className="overflow-x-auto">
       <table className="table table-compact w-full">
