@@ -16,8 +16,18 @@ const GridView = ({ products }) => {
 	}
 
 	function add2CartFunction(product) {
-		dispatch(addToCart(product));
-	}
+		dispatch(
+		  addToCart({
+			id: product.id,
+			name: product.name, 
+			imageURL: product.imageURL,
+			price: product.price,
+			qty: 1, // Ensure quantity is explicitly added
+		  })
+		);
+		dispatch(calculateTotalQuantity());
+	  }
+	  
 
 	return (
 		<div className=" flex flex-wrap gap-y-5 py-10 ">

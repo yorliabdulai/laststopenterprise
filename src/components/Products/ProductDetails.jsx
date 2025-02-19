@@ -44,10 +44,19 @@ const ProductDetails = () => {
   }, [id]);
 
   // Add to cart
-  function add2CartFunction(product) {
-    dispatch(addToCart({ ...product, id }));
+  function addToCartFunction(product) {
+    dispatch(
+      addToCart({
+        id: product.id,
+        name: product.name,
+        imageURL: product.imageURL,
+        price: product.price,
+        qty: 1, // Ensure default quantity
+      })
+    );
     dispatch(calculateTotalQuantity());
   }
+  
 
   // Decrease quantity
   function decreaseQty(product) {

@@ -16,8 +16,17 @@ const ListView = ({ products }) => {
 	}
 
 	function add2CartFunction(product) {
-		dispatch(addToCart(product));
-	}
+		dispatch(
+		  addToCart({
+			id: product.id,
+			name: product.name, 
+			imageURL: product.imageURL,
+			price: product.price,
+			qty: 1, // Ensure quantity is explicitly set
+		  })
+		);
+	  }
+	  
 
 	return (
 		<div className="w-full flex flex-col gap-y-5 py-10">
