@@ -22,6 +22,7 @@ const Cart = () => {
 	const { cartItems, totalAmount, totalQuantity } = useSelector((store) => store.cart);
 	const { isUserLoggedIn } = useSelector((store) => store.auth);
 	const dispatch = useDispatch();
+
 	//! increase cart item Qty
 	const increaseQty = (item) => {
 		dispatch(addToCart(item));

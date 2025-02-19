@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
 	orderHistory: [],
 	totalAmount: null,
+	orderedProducts: [],
 };
 
 const orderSlice = createSlice({
@@ -24,9 +25,12 @@ const orderSlice = createSlice({
 			const total = newArray.reduce((total, curr) => total + curr, 0);
 			state.totalAmount = total;
 		},
+		addOrderedProducts(state, action) {
+      state.orderedProducts = action.payload;
+    },
 	},
 });
 
-export const { storeOrders, totalOrderAmount } = orderSlice.actions;
+export const { storeOrders, totalOrderAmount, addOrderedProducts } = orderSlice.actions;
 
 export default orderSlice.reducer;

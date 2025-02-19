@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 import { formatPrice } from "../../utils/formatPrice";
-
+import { useSelector } from "react-redux";
 import ChangeOrderStatus from "../changeOrderStatus/ChangeOrderStatus";
 import { OrderTable, Steps } from "../../components";
 
 const OrderDetailsComponent = ({ order, admin, user, id }) => {
-    
+    const orderedProducts = useSelector((state) => state.orders.orderedProducts);
      // Log the order structure
      console.log("Order object:", order);
 
@@ -84,7 +84,7 @@ const OrderDetailsComponent = ({ order, admin, user, id }) => {
                     )}
                 </div>
 
-                <OrderTable order={order} user={user} />
+                <OrderTable orderedProducts={orderedProducts} />
             </main>
         </>
     );

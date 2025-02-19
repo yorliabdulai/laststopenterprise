@@ -7,6 +7,7 @@ import useFetchDocument from "../../hooks/useFetchDocument";
 import OrderDetailsComponent from "../../components/orderDetailsComponent/OrderDetailsComponent";
 
 const OrderDetails = () => {
+	
 	const [order, setOrder] = useState(null);
 	const { id } = useParams();
 	const { document } = useFetchDocument("orders", id);
