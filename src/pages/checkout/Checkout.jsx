@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { addOrderedProducts, clearCart } from "../../redux/slice/orderSlice";
-import { formatPrice } from "../utils/helpers";
+import { formatPrice } from "../../utils/formatPrice";
 
 const Checkout = () => {
     const dispatch = useDispatch();
