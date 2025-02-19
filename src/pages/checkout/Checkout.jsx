@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { addOrderedProducts, clearCart } from "../redux/cartSlice";
+import { addOrderedProducts, clearCart } from "../../redux/slice/orderSlice";
 import { formatPrice } from "../utils/helpers";
 
 const Checkout = () => {
@@ -46,6 +46,10 @@ const Checkout = () => {
             }
 
             sessionStorage.setItem("pendingOrderId", savedOrderId);
+
+            // Dispatch order details to store
+            dispatch(addOrderedProducts(orderDetails));
+            dispatch(clearCart());
 
             // Proceed to payment
             await handlePaystackPayment(orderDetails);
