@@ -69,19 +69,20 @@ const Checkout = () => {
     
             // Prepare order details
             const orderDetails = {
-                items: orderDetails.items.map((item) => ({
+                items: cartItems.map((item) => ({
                     name: item.name, 
-                    image: item.imageUrl, 
+                    image: item.imageURL,  // Ensure this key matches the correct data field
                     price: item.price,
                     qty: item.qty,
                 })),
                 email,
                 shippingAddress,
                 userId: userId || "guest",
-                amount: totalAmount,  // Convert to the smallest unit (e.g., kobo)
-                description: `Payment of ${formatPrice(totalAmount/100)} from ${email}`,
-                orderStatus: "Pending",  // Set initial status to "Pending"
+                amount: totalAmount,
+                description: `Payment of ${formatPrice(totalAmount / 100)} from ${email}`,
+                orderStatus: "Pending",
             };
+            
     
             // Save the order before initiating the payment
             const savedOrderId = await saveOrder(orderDetails);
