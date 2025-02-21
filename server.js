@@ -15,7 +15,8 @@ if (process.env.NODE_ENV === "production") {
 app.use(express.json());
 const allowedOrigins = [
     'https://laststopenterprise.vercel.app',
-    'https://amlaststopenterprise.netlify.app'
+    'https://amlaststopenterprise.netlify.app',
+    'http://localhost:5173'
 ];
 
 app.use(cors({

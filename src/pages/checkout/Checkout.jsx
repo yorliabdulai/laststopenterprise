@@ -34,6 +34,8 @@ const Checkout = () => {
 
     const saveOrder = async (orderDetails) => {
         console.log("Attempting to save order:", orderDetails);
+        console.log("Saving Order:", JSON.stringify(orderDetails, null, 2));
+
 
         if (!orderDetails.email) {
             toast.error("User email not found. Cannot save order.");
