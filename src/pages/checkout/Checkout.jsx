@@ -70,13 +70,16 @@ const Checkout = () => {
             // Prepare order details
             const orderDetails = {
                 items: cartItems.map((item) => ({
+                    id: item.id,
+                    name: item.name, 
+                    imageURL: item.imageURL,
                     price: item.price,
                     qty: item.qty,
                 })),
                 email,
                 shippingAddress,
                 amount: totalAmount,  // Convert to the smallest unit (e.g., kobo)
-                description: `Payment of ${formatPrice(totalAmount/100)} from ${email}`,
+                description: `Payment of ${formatPrice(totalAmount)} from ${email}`,
                 orderStatus: "Pending",  // Set initial status to "Pending"
             };
     
