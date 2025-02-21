@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import supabase from "../../supabase/supabase";
 
 const ChangeOrderStatus = ({ order }) => {
-    const orderId = order?.id; // Ensure it gets the ID
+    const orderId = order?.id; // Ensure we get the order ID
     const [status, setStatus] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
@@ -17,12 +17,15 @@ const ChangeOrderStatus = ({ order }) => {
         e.preventDefault();
         setIsLoading(true);
 
-        if (!orderId) {
-            toast.error("Error: Order ID is missing!");
+        // Ensure orderId is a valid UUID
+        if (!orderId || !/^[0-9a-fA-F-]{36}$/.test(orderId)) {
+            toast.error("Invalid or missing Order ID!");
+            console.error("Invalid Order ID:", orderId);
             setIsLoading(false);
             return;
         }
 
+        // Ensure a status is selected
         if (!status) {
             toast.error("Please select a status before updating.");
             setIsLoading(false);
@@ -32,30 +35,21 @@ const ChangeOrderStatus = ({ order }) => {
         console.log("Updating order status to:", status);
 
         try {
-            const { error } = await supabase
+            const { data, error } = await supabase
                 .from("orders")
-                .update({ orderStatus: status, editedAt: new Date().toISOString() })
-                .eq("id", orderId);
+                .update({ "orderStatus": status, "editedAt": new Date().toISOString() })
+                .eq("id", orderId)
+                .select("id, orderStatus");
 
             if (error) throw error;
 
-            console.log(`Order status updated to: ${status}`);
+            console.log("Update Response:", data);
 
-            // Fetch updated order to confirm change
-            const { data, error: fetchError } = await supabase
-                .from("orders")
-                .select("orderStatus")
-                .eq("id", orderId)
-                .single();
-
-            if (fetchError) throw fetchError;
-
-            console.log("Updated order data:", data);
-            if (data?.orderStatus === status) {
+            if (!data || data.length === 0) {
+                toast.warn("Order not found or update failed. Check Order ID.");
+            } else {
                 toast.success(`Order status changed to ${status}`);
                 navigate("/admin/orders");
-            } else {
-                toast.warn("Order status update may not have applied. Please refresh.");
             }
         } catch (error) {
             console.error("Supabase Error:", error);
