@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"; 
 import Loader from "../../components/loader/Loader";
 import { useSelector, useDispatch } from "react-redux";
 import { calculateSubtotal, calculateTotalQuantity, clearCart } from "../../redux/slice/cartSlice";
 import { formatPrice } from "../../utils/formatPrice";
-import supabase from "../../supabase/supabase"; // Ensure correct import
+import supabase from "../../supabase/supabase"; 
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "./paystack.css";
@@ -33,9 +33,7 @@ const Checkout = () => {
     }, []);
 
     const saveOrder = async (orderDetails) => {
-        console.log("Attempting to save order:", orderDetails);
         console.log("Saving Order:", JSON.stringify(orderDetails, null, 2));
-
 
         if (!orderDetails.email) {
             toast.error("User email not found. Cannot save order.");
@@ -65,11 +63,8 @@ const Checkout = () => {
         setIsLoading(true);
         try {
             console.log("Starting payment process...");
-            console.log("Cart Items:", cartItems);
-            console.log("Total Amount:", totalAmount);
-            console.log("User Email:", email);
-    
-            // Prepare order details
+            console.log("Cart Items:", JSON.stringify(cartItems, null, 2));
+
             const orderDetails = {
                 items: cartItems.map((item) => ({
                     id: item.id,
@@ -77,38 +72,41 @@ const Checkout = () => {
                     imageURL: item.imageURL,
                     price: item.price,
                     qty: item.qty,
+                    category: item.category, 
+                    brand: item.brand,  
+                    description: item.description, 
                 })),
                 email,
                 shippingAddress,
-                amount: totalAmount,  // Convert to the smallest unit (e.g., kobo)
+                amount: totalAmount,  // Ensure correct amount
                 description: `Payment of ${formatPrice(totalAmount)} from ${email}`,
-                orderStatus: "Pending",  // Set initial status to "Pending"
+                orderStatus: "Pending",
             };
-    
+
+            console.log("Prepared Order Details:", JSON.stringify(orderDetails, null, 2));
+
             // Save the order before initiating the payment
             const savedOrderId = await saveOrder(orderDetails);
             if (!savedOrderId) {
                 toast.error("Failed to save order. Please try again.");
-                return;  // Don't proceed if order is not saved
+                return;
             }
-    
-            // Store the order ID in sessionStorage to retrieve later for status update
+
             sessionStorage.setItem("pendingOrderId", savedOrderId);
-    
-            // Proceed with the Paystack payment initiation
+
             const response = await fetch("https://laststopenterprise.onrender.com/initialize-transaction", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(orderDetails),
             });
-    
+
             console.log("Response Status:", response.status);
-    
+
             const data = await response.json();
             console.log("Response Data:", data);
-    
+
             if (data.authorization_url) {
-                window.location.href = data.authorization_url; // Redirect to Paystack for payment
+                window.location.href = data.authorization_url;
             } else {
                 toast.error("Failed to initiate payment. Please try again.");
             }
@@ -119,8 +117,6 @@ const Checkout = () => {
             setIsLoading(false);
         }
     };
-    
-    
 
     const verifyTransaction = async (reference) => {
         console.log("Verifying transaction with reference:", reference);
