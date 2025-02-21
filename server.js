@@ -13,10 +13,21 @@ if (process.env.NODE_ENV === "production") {
 }
 
 app.use(express.json());
+const allowedOrigins = [
+    'https://laststopenterprise.vercel.app',
+    'https://amlaststopenterprise.netlify.app'
+];
+
 app.use(cors({
-    origin: 'https://laststopenterprise.vercel.app', 
-    methods: 'GET,POST,PUT,DELETE,OPTIONS',  // Specify the allowed methods
-    allowedHeaders: 'Content-Type,Authorization' // Specify allowed headers
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: 'GET,POST,PUT,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type,Authorization'
 }));
 
 app.get("/", (req, res) => {
