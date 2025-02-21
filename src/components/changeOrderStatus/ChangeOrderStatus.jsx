@@ -35,7 +35,7 @@ const ChangeOrderStatus = ({ order }) => {
             const { data, error } = await supabase
                 .from("orders")
                 .update({ orderStatus: status, editedAt: new Date().toISOString() })
-                .eq("id", orderId)
+                .match("id", orderId)
                 .select("id, orderStatus");
     
             if (error) {
