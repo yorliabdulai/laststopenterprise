@@ -16,48 +16,48 @@ const ChangeOrderStatus = ({ order }) => {
     const changeStatus = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-
-        // Ensure orderId is a valid UUID
-        if (!orderId || !/^[0-9a-fA-F-]{36}$/.test(orderId)) {
-            toast.error("Invalid or missing Order ID!");
-            console.error("Invalid Order ID:", orderId);
+    
+        if (!orderId) {
+            toast.error("Error: Order ID is missing!");
             setIsLoading(false);
             return;
         }
-
-        // Ensure a status is selected
+    
         if (!status) {
             toast.error("Please select a status before updating.");
             setIsLoading(false);
             return;
         }
-
-        console.log("Updating order status to:", status);
-
+    
         try {
+            console.log(`🔄 Updating order ${orderId} to status: ${status}`);
+    
             const { data, error } = await supabase
                 .from("orders")
-                .update({ "orderStatus": status, "editedAt": new Date().toISOString() })
+                .update({ orderStatus: status, editedAt: new Date().toISOString() })
                 .eq("id", orderId)
                 .select("id, orderStatus");
-
-            if (error) throw error;
-
-            console.log("Update Response:", data);
-
+    
+            if (error) {
+                console.error("❌ Supabase Error:", error);
+                toast.error(`Update failed: ${error.message || "Unknown error"}`);
+                return;
+            }
+    
             if (!data || data.length === 0) {
-                toast.warn("Order not found or update failed. Check Order ID.");
+                toast.warn("⚠️ Order not found or no update applied.");
             } else {
-                toast.success(`Order status changed to ${status}`);
+                toast.success(`✅ Order status changed to ${status}`);
                 navigate("/admin/orders");
             }
         } catch (error) {
-            console.error("Supabase Error:", error);
-            toast.error(`Update failed: ${error.message}`);
+            console.error("🚨 Network or Fetch Error:", error);
+            toast.error(`Network error: ${error.message}`);
         } finally {
             setIsLoading(false);
         }
     };
+    
 
     return (
         <>
