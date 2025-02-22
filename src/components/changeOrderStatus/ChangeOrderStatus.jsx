@@ -29,13 +29,28 @@ const ChangeOrderStatus = ({ order }) => {
             return;
         }
     
+        console.log("🔍 Checking order ID type:", typeof orderId, "Value:", orderId);
+    
         try {
+            // Check if order exists
+            const { data: existingOrder, error: fetchError } = await supabase
+                .from("orders")
+                .select("id")
+                .eq("id", String(orderId))
+                .single();
+    
+            if (fetchError || !existingOrder) {
+                toast.error("Order not found in database!");
+                setIsLoading(false);
+                return;
+            }
+    
             console.log(`🔄 Updating order ${orderId} to status: ${status}`);
     
             const { data, error } = await supabase
                 .from("orders")
                 .update({ orderStatus: status, editedAt: new Date().toISOString() })
-                .match("id", orderId)
+                .eq("id", String(orderId)) // Ensure orderId is a string
                 .select("id, orderStatus");
     
             if (error) {
@@ -44,12 +59,8 @@ const ChangeOrderStatus = ({ order }) => {
                 return;
             }
     
-            if (!data || data.length === 0) {
-                toast.warn("⚠️ Order not found or no update applied.");
-            } else {
-                toast.success(`✅ Order status changed to ${status}`);
-                navigate("/admin/orders");
-            }
+            toast.success(`✅ Order status changed to ${status}`);
+            navigate("/admin/orders");
         } catch (error) {
             console.error("🚨 Network or Fetch Error:", error);
             toast.error(`Network error: ${error.message}`);
@@ -57,6 +68,7 @@ const ChangeOrderStatus = ({ order }) => {
             setIsLoading(false);
         }
     };
+    
     
 
     return (
