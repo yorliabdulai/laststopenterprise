@@ -4,14 +4,11 @@ import Loader from "../loader/Loader";
 import { useNavigate } from "react-router-dom";
 import supabase from "../../supabase/supabase";
 
-const ChangeOrderStatus = ({ order }) => {
-    const orderId = order?.id; // Ensure we get the order ID
+const ChangeOrderStatus = ({ order, onUpdate }) => {
+    const orderId = order?.id;
     const [status, setStatus] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
-
-    console.log("Order Object:", order);
-    console.log("Extracted Order ID:", orderId);
 
     const changeStatus = async (e) => {
         e.preventDefault();
@@ -29,10 +26,8 @@ const ChangeOrderStatus = ({ order }) => {
             return;
         }
     
-        console.log("🔍 Checking order ID type:", typeof orderId, "Value:", orderId);
-    
         try {
-            // Check if order exists
+            // Ensure the order exists
             const { data: existingOrder, error: fetchError } = await supabase
                 .from("orders")
                 .select("id")
@@ -45,12 +40,11 @@ const ChangeOrderStatus = ({ order }) => {
                 return;
             }
     
-            console.log(`🔄 Updating order ${orderId} to status: ${status}`);
-    
+            // Update the order status
             const { data, error } = await supabase
                 .from("orders")
-                .update({ orderStatus: status, editedAt: new Date().toISOString() })
-                .eq("id", String(orderId)) // Ensure orderId is a string
+                .update({ "orderStatus": status, "editedAt": new Date().toISOString() })
+                .eq("id", String(orderId))
                 .select("id, orderStatus");
     
             if (error) {
@@ -60,7 +54,7 @@ const ChangeOrderStatus = ({ order }) => {
             }
     
             toast.success(`✅ Order status changed to ${status}`);
-            navigate("/admin/orders");
+            if (onUpdate) onUpdate(); // Trigger rerender if onUpdate callback is passed
         } catch (error) {
             console.error("🚨 Network or Fetch Error:", error);
             toast.error(`Network error: ${error.message}`);
@@ -68,8 +62,6 @@ const ChangeOrderStatus = ({ order }) => {
             setIsLoading(false);
         }
     };
-    
-    
 
     return (
         <>
@@ -88,8 +80,8 @@ const ChangeOrderStatus = ({ order }) => {
                         <option value="Item(s) Shipped">Item(s) Shipped</option>
                         <option value="Item(s) Delivered">Item(s) Delivered</option>
                     </select>
-                    <button type="submit" className="btn btn-primary-content btn-sm mt-2">
-                        Update status
+                    <button type="submit" className="btn btn-primary btn-sm mt-2">
+                        Update Status
                     </button>
                 </form>
             </div>
