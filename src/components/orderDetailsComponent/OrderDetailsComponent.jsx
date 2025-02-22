@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 import { formatPrice } from "../../utils/formatPrice";
-
+import { useState } from "react";
 import ChangeOrderStatus from "../changeOrderStatus/ChangeOrderStatus";
 import { OrderTable, Steps } from "../../components";
 
 const OrderDetailsComponent = ({ order, admin, user, id }) => {
-    
+    const [orderStatus, setOrderStatus] = useState(order?.orderStatus);
      // Log the order structure
      console.log("Order object:", order);
 
@@ -68,7 +68,7 @@ const OrderDetailsComponent = ({ order, admin, user, id }) => {
                         )}
                     </div>
                     {/* Update order Status */}
-                    {admin && <ChangeOrderStatus order={order} orderId={order?.id} />}
+                    {admin && <ChangeOrderStatus order={order} orderId={order?.id} onUpdate={(newStatus) => setOrderStatus(newStatus)}/>}
                 </article>
             </section>
             <main className="py-5">

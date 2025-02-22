@@ -12,52 +12,47 @@ const ChangeOrderStatus = ({ order, orderId, onUpdate }) => {
     const changeStatus = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-
+    
         if (!orderId) {
             toast.error("Error: Order ID is missing!");
             setIsLoading(false);
             return;
         }
-
+    
         if (!status) {
             toast.error("Please select a status before updating.");
             setIsLoading(false);
             return;
         }
-
-        const orderDetails = {
-            userId: order.userId,
-            email: order.email,
-            orderDate: order.orderDate,
-            orderAmount: order.orderAmount,
-            orderStatus: status,
-            shippingAddress: order.shippingAddress,
-            createdAt: order.createdAt,
-            editedAt: new Date().toISOString(), // Replaces Timestamp.now()
-        };
-
+    
         try {
-            const { error } = await supabase
+            // Update only the `orderStatus` field
+            const { data, error } = await supabase
                 .from("orders")
-                .update(orderDetails)
-                .eq("id", orderId);
-
+                .update({ orderStatus: status, editedAt: new Date().toISOString() })
+                .eq("id", orderId)
+                .select();
+    
             if (error) {
                 throw new Error(error.message);
             }
-
+    
+            if (data.length === 0) {
+                throw new Error("Order not found or update failed.");
+            }
+    
             toast.success(`Order status changed to ${status}`);
-
-            // Trigger rerender
-            if (onUpdate) onUpdate();
-
-            navigate("/admin/orders");
+    
+            // Call onUpdate to update UI
+            if (onUpdate) onUpdate(status);
+    
         } catch (error) {
             toast.error(`Update failed: ${error.message}`);
         } finally {
             setIsLoading(false);
         }
     };
+    
 
     return (
         <>
