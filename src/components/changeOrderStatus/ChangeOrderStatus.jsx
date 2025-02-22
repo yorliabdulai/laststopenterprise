@@ -12,7 +12,7 @@ const ChangeOrderStatus = ({ order, orderId, onUpdate }) => {
     const changeStatus = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-    Console.log("Order ID:", orderId);
+        console.log("Order ID:", orderId);
         if (!orderId) {
             toast.error("Error: Order ID is missing!");
             setIsLoading(false);
