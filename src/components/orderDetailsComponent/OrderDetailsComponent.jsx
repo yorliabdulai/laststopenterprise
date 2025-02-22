@@ -68,7 +68,7 @@ const OrderDetailsComponent = ({ order, admin, user, id }) => {
                         )}
                     </div>
                     {/* Update order Status */}
-                    {admin && <ChangeOrderStatus order={order} id={id} />}
+                    {admin && <ChangeOrderStatus order={order} orderId={order?.id} />}
                 </article>
             </section>
             <main className="py-5">
