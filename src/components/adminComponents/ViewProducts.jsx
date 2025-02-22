@@ -49,14 +49,19 @@ const ViewProducts = () => {
       const { error: storageError } = await supabase.storage.from("products").remove([filePath]);
       if (storageError) throw storageError;
   
-      // Update Redux state to remove deleted product
-      dispatch(storeProducts({ products: products.filter((p) => p.id !== id) }));
+      // Fetch updated products after deletion
+      const { data: updatedData, error: fetchError } = await supabase.from("products").select("*");
+      if (fetchError) throw fetchError;
+  
+      // Dispatch updated data to Redux
+      dispatch(storeProducts({ products: updatedData }));
   
       toast.success("Product deleted successfully");
     } catch (error) {
       toast.error(`Delete failed: ${error.message}`);
     }
   };
+  
   
 
   return (
