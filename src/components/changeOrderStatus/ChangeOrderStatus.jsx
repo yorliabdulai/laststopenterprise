@@ -29,7 +29,7 @@ const ChangeOrderStatus = ({ order, orderId, onUpdate }) => {
             // Update only the `orderStatus` field
             const { data, error } = await supabase
                 .from("orders")
-                .update({ orderStatus: status, editedAt: new Date().toISOString() })
+                .update({ "orderStatus": status, "editedAt": new Date().toISOString() })
                 .eq("id", orderId)
                 .select();
     
