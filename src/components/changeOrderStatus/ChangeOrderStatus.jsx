@@ -13,6 +13,7 @@ const ChangeOrderStatus = ({ order, orderId, onUpdate }) => {
         e.preventDefault();
         setIsLoading(true);
         console.log("Order ID:", orderId);
+    
         if (!orderId) {
             toast.error("Error: Order ID is missing!");
             setIsLoading(false);
@@ -31,13 +32,15 @@ const ChangeOrderStatus = ({ order, orderId, onUpdate }) => {
                 .from("orders")
                 .update({ orderStatus: status, editedAt: new Date().toISOString() })
                 .eq("id", String(orderId))
-                .single();
-                console.log("Update Response:", data, error);
+                .select(); // REMOVE `.single()`
+    
+            console.log("Update Response:", data, error);
+    
             if (error) {
                 throw new Error(error.message);
             }
     
-            if (data.length === 0) {
+            if (!data || data.length === 0) {
                 throw new Error("Order not found or update failed.");
             }
     
@@ -53,6 +56,7 @@ const ChangeOrderStatus = ({ order, orderId, onUpdate }) => {
             setIsLoading(false);
         }
     };
+    
     
 
     return (
