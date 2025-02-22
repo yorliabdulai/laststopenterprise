@@ -41,9 +41,7 @@ const ListView = ({ products }) => {
 								placeholderSrc="https://www.slntechnologies.com/wp-content/uploads/2017/08/ef3-placeholder-image.jpg"
 								effect="blur"
 							/>
-							<div className=" absolute top-0 right-0">
-								<span className="badge ">Free Delivery</span>
-							</div>
+							
 							<div className="flex-1">
 								<h1 className="font-semibold">{product.brand}</h1>
 								<h1 className="font-semibold pb-2">{product.name}</h1>

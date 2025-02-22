@@ -35,17 +35,29 @@ const ViewProducts = () => {
 
   //! Delete single product
   const deleteSingleProduct = async (id, imageURL) => {
+    if (!window.confirm("Are you sure you want to delete this product?")) {
+      return;
+    }
+  
     try {
-      // deleting a document from product collection
-      await supabase.from("products").delete().eq("id", id);
-      // deleting image from storage
-      const { error } = await supabase.storage.from("products").remove([imageURL]);
-      if (error) throw error;
-      toast.info("Product deleted successfully");
+      // Deleting product from Supabase database
+      const { error: deleteError } = await supabase.from("products").delete().eq("id", id);
+      if (deleteError) throw deleteError;
+  
+      // Extract file path from the imageURL
+      const filePath = imageURL.split("/").pop(); // Get only the filename
+      const { error: storageError } = await supabase.storage.from("products").remove([filePath]);
+      if (storageError) throw storageError;
+  
+      // Update Redux state to remove deleted product
+      dispatch(storeProducts({ products: products.filter((p) => p.id !== id) }));
+  
+      toast.success("Product deleted successfully");
     } catch (error) {
-      toast.error(error.message);
+      toast.error(`Delete failed: ${error.message}`);
     }
   };
+  
 
   return (
     <>

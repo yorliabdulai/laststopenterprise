@@ -44,9 +44,7 @@ const GridView = ({ products }) => {
 									placeholderSrc="https://www.slntechnologies.com/wp-content/uploads/2017/08/ef3-placeholder-image.jpg"
 									effect="blur"
 								/>
-								<div className=" absolute top-0 right-0">
-									<span className="badge badge-primary">Free Delivery</span>
-								</div>
+								
 								<div className="my-4 items-center text-center">
 									<h1 className="font-semibold py-2">{name}</h1>
 									<p className="py-2 text-lg">{formatPrice(price)}</p>
