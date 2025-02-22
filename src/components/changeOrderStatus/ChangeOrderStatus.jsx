@@ -12,7 +12,7 @@ const ChangeOrderStatus = ({ order, orderId, onUpdate }) => {
     const changeStatus = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-    
+    Console.log("Order ID:", orderId);
         if (!orderId) {
             toast.error("Error: Order ID is missing!");
             setIsLoading(false);
@@ -45,6 +45,7 @@ const ChangeOrderStatus = ({ order, orderId, onUpdate }) => {
     
             // Call onUpdate to update UI
             if (onUpdate) onUpdate(status);
+            navigate("/admin/orders");
     
         } catch (error) {
             toast.error(`Update failed: ${error.message}`);
