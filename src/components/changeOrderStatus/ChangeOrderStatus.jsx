@@ -31,7 +31,7 @@ const ChangeOrderStatus = ({ order, orderId, onUpdate }) => {
                 .from("orders")
                 .update({ orderStatus: status, editedAt: new Date().toISOString() })
                 .eq("id", String(orderId))
-                .select();
+                .single();
                 console.log("Update Response:", data, error);
             if (error) {
                 throw new Error(error.message);
