@@ -57,39 +57,55 @@ const AddProducts = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
-    if (Object.values(product).some((field) => !field)) {
-      toast.error("All fields are required");
+  
+    // Ensure required fields are not empty
+    const requiredFields = ["name", "price", "category", "brand", "description"];
+    for (const field of requiredFields) {
+      if (!product[field] || product[field].trim() === "") {
+        toast.error(`${field} is required`);
+        setIsLoading(false);
+        return;
+      }
+    }
+  
+    // Ensure price is a valid number
+    if (isNaN(product.price) || product.price <= 0) {
+      toast.error("Price must be a valid number greater than 0");
       setIsLoading(false);
       return;
     }
-
+  
+    // Ensure image is set when adding a product
+    if (paramsId === "ADD" && !product.imageURL) {
+      toast.error("Product image is required");
+      setIsLoading(false);
+      return;
+    }
+  
     const productData = {
       ...product,
       price: Number(product.price),
-      createdAt: new Date().toISOString(),
+      createdAt: paramsId === "ADD" ? new Date().toISOString() : product.createdAt,
     };
-
+  
     let error;
     if (paramsId === "ADD") {
       ({ error } = await supabase.from("products").insert([productData]));
     } else {
       ({ error } = await supabase.from("products").update(productData).eq("id", paramsId));
     }
-
+  
     if (error) {
       toast.error("Something went wrong");
     } else {
-      toast.success(
-        paramsId === "ADD" ? "Product added successfully" : "Product updated successfully"
-      );
+      toast.success(paramsId === "ADD" ? "Product added successfully" : "Product updated successfully");
       navigate("/admin/all-products");
     }
-
+  
     setProduct(defaultValues);
     setIsLoading(false);
   };
-
+  
   return (
     <>
       {isLoading && <Loader />}
