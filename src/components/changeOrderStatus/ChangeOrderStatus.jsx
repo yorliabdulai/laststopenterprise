@@ -12,7 +12,7 @@ const ChangeOrderStatus = ({ order, orderId, onUpdate }) => {
     const changeStatus = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        console.log("Order ID:", orderId);
+        ;
     
         if (!orderId) {
             toast.error("Error: Order ID is missing!");
@@ -34,7 +34,7 @@ const ChangeOrderStatus = ({ order, orderId, onUpdate }) => {
                 .eq("id", String(orderId))
                 .select(); // REMOVE `.single()`
     
-            console.log("Update Response:", data, error);
+            ;
     
             if (error) {
                 throw new Error(error.message);

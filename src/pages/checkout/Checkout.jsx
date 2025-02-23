@@ -27,13 +27,13 @@ const Checkout = () => {
         const reference = urlParams.get("reference");
 
         if (reference) {
-            console.log("Reference found in URL:", reference);
+            ;
             verifyTransaction(reference);
         }
     }, []);
 
     const saveOrder = async (orderDetails) => {
-        console.log("Saving Order:", JSON.stringify(orderDetails, null, 2));
+        ;
 
         if (!orderDetails.email) {
             toast.error("User email not found. Cannot save order.");
@@ -49,7 +49,7 @@ const Checkout = () => {
 
             if (error) throw error;
 
-            console.log("Order saved successfully! Order ID:", data.id);
+            ;
             toast.success("Order saved successfully!");
             return data.id;
         } catch (error) {
@@ -62,8 +62,8 @@ const Checkout = () => {
     const handlePaystackPayment = async () => {
         setIsLoading(true);
         try {
-            console.log("Starting payment process...");
-            console.log("Cart Items:", JSON.stringify(cartItems, null, 2));
+            ;
+            ;
 
             const orderDetails = {
                 items: cartItems.map((item) => ({
@@ -83,7 +83,7 @@ const Checkout = () => {
                 orderStatus: "Pending",
             };
 
-            console.log("Prepared Order Details:", JSON.stringify(orderDetails, null, 2));
+            ;
 
             // Save the order before initiating the payment
             const savedOrderId = await saveOrder(orderDetails);
@@ -100,10 +100,10 @@ const Checkout = () => {
                 body: JSON.stringify(orderDetails),
             });
 
-            console.log("Response Status:", response.status);
+            ;
 
             const data = await response.json();
-            console.log("Response Data:", data);
+            ;
 
             if (data.authorization_url) {
                 window.location.href = data.authorization_url;
@@ -119,7 +119,7 @@ const Checkout = () => {
     };
 
     const verifyTransaction = async (reference) => {
-        console.log("Verifying transaction with reference:", reference);
+        ;
 
         try {
             const response = await fetch(`https://laststopenterprise.onrender.com/verify-transaction?reference=${reference}`);
@@ -129,13 +129,13 @@ const Checkout = () => {
             }
 
             const data = await response.json();
-            console.log("Transaction verification response:", data);
+            ;
 
             if (data.success) {
                 const pendingOrderId = sessionStorage.getItem("pendingOrderId");
 
                 if (pendingOrderId) {
-                    console.log("Updating order status to Completed for Order ID:", pendingOrderId);
+                    ;
                     await updateOrderStatus(pendingOrderId, "Completed");
                     dispatch(clearCart());
                     sessionStorage.removeItem("pendingOrderId");
@@ -154,7 +154,7 @@ const Checkout = () => {
     };
 
     const updateOrderStatus = async (orderId, newStatus) => {
-        console.log(`Updating order status for Order ID: ${orderId} to ${newStatus}`);
+        ;
 
         try {
             const { error } = await supabase
@@ -164,7 +164,7 @@ const Checkout = () => {
 
             if (error) throw error;
 
-            console.log("Order status updated successfully");
+            ;
         } catch (error) {
             console.error("Error updating order status:", error);
             toast.error(`Failed to update order status: ${error.message}`);

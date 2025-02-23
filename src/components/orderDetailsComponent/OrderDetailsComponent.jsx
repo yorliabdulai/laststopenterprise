@@ -7,9 +7,9 @@ import { OrderTable, Steps } from "../../components";
 const OrderDetailsComponent = ({ order, admin, user, id }) => {
     const [orderStatus, setOrderStatus] = useState(order?.orderStatus);
      // Log the order structure
-     console.log("Order object:", order);
+     ;
 
-     console.log(order?.amount); // Check the value before formatting
+     ; // Check the value before formatting
 
     return (
         <>
